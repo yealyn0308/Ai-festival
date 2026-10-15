@@ -1,0 +1,142 @@
+netlify/functions/bus.js
+
+
+const https = require("https");
+
+const API_CONFIG = {
+  arrival: {
+    key: "BUS_ARRIVAL_API_KEY",
+    baseUrl:
+      "https://apis.data.go.kr/1613000/ArvlInfoInqireService",
+    endpoint: "/getSttnAcctoArvlPrearngeInfoList"
+  },
+  route: {
+    key: "BUS_ROUTE_API_KEY",
+    baseUrl:
+      "https://apis.data.go.kr/1613000/BusRouteInfoInqireService"
+  },
+  stop: {
+    key: "BUS_STOP_API_KEY",
+    baseUrl:
+      "https://apis.data.go.kr/1613000/BusSttnInfoInqireService"
+  }
+};
+
+function jsonResponse(statusCode, data) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "GET, OPTIONS"
+    },
+    body: JSON.stringify(data)
+  };
+}
+
+function requestApi(url) {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (response) => {
+        let body = "";
+
+        response.setEncoding("utf8");
+        response.on("data", (chunk) => {
+          body += chunk;
+        });
+
+        response.on("end", () => {
+          resolve({
+            statusCode: response.statusCode,
+            body
+          });
+        });
+      })
+      .on("error", reject);
+  });
+}
+
+exports.handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") {
+    return jsonResponse(200, {});
+  }
+
+  if (event.httpMethod !== "GET") {
+    return jsonResponse(405, {
+      error: "GET 요청만 허용됩니다."
+    });
+  }
+
+  const params = event.queryStringParameters || {};
+  const type = params.type;
+
+  if (!["arrival", "route", "stop"].includes(type)) {
+    return jsonResponse(400, {
+      error: "type은 arrival, route, stop 중 하나여야 합니다."
+    });
+  }
+
+  const config = API_CONFIG[type];
+  const apiKey = process.env[config.key];
+
+  if (!apiKey) {
+    return jsonResponse(500, {
+      error: "서버 환경 변수에 API 인증키가 설정되지 않았습니다."
+    });
+  }
+
+  if (type !== "arrival") {
+    return jsonResponse(501, {
+      error:
+        "이 유형의 검색은 API별 필수 매개변수를 확인한 뒤 연결할 예정입니다."
+    });
+  }
+
+  const cityCode = params.cityCode;
+  const nodeId = params.nodeId;
+
+  if (!cityCode || !nodeId) {
+    return jsonResponse(400, {
+      error: "도착정보 조회에는 cityCode와 nodeId가 필요합니다."
+    });
+  }
+
+  const url = new URL(
+    config.baseUrl + config.endpoint
+  );
+
+  url.searchParams.set("serviceKey", apiKey);
+  url.searchParams.set("cityCode", cityCode);
+  url.searchParams.set("nodeId", nodeId);
+  url.searchParams.set("_type", "json");
+  url.searchParams.set("numOfRows", "10");
+  url.searchParams.set("pageNo", "1");
+
+  try {
+    const result = await requestApi(url);
+
+    if (result.statusCode < 200 || result.statusCode >= 300) {
+      return jsonResponse(502, {
+        error: "공공데이터 API에서 오류 응답을 받았습니다."
+      });
+    }
+
+    let data;
+
+    try {
+      data = JSON.parse(result.body);
+    } catch {
+      return jsonResponse(502, {
+        error:
+          "API 응답이 JSON 형식이 아닙니다. 인증키나 응답 형식을 확인해야 합니다."
+      });
+    }
+
+    return jsonResponse(200, data);
+  } catch {
+    return jsonResponse(502, {
+      error: "공공데이터 API 요청에 실패했습니다."
+    });
+  }
+};
