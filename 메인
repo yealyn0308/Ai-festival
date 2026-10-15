@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fff8fb" />
+  <title>버스온 | 혼잡도 예측 · 최적 경로</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+    :root{--ink:#282638;--muted:#817d91;--pink:#ef78a5;--pink2:#ffe5ef;--mint:#dff5ed;--line:#eeeaf1;--paper:#fff;--bg:#fff9fb;--purple:#7469a8;--shadow:0 18px 55px #47335412}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 8% 3%,#ffeaf2 0,transparent 28%),radial-gradient(ellipse at 92% 35%,#eaf8f3 0,transparent 26%),var(--bg);color:var(--ink);font-family:'DM Sans','Noto Sans KR',sans-serif}a{color:inherit;text-decoration:none}button,input{font:inherit}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    header{height:76px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:21px;font-weight:800;letter-spacing:-.7px;display:flex;align-items:center;gap:9px}.brand-mark{width:35px;height:35px;border-radius:12px;background:var(--pink);display:grid;place-items:center;color:white;font-size:18px;box-shadow:0 7px 16px #ef78a544}.brand span{color:var(--pink)}nav{display:flex;gap:30px;color:#777386;font-size:13px;font-weight:600}nav a:hover{color:var(--pink)}.live{font-size:12px;color:#5c9c83;background:#e7f7ef;padding:9px 13px;border-radius:99px;font-weight:700}.live i{display:inline-block;width:7px;height:7px;background:#6bc39a;border-radius:50%;margin-right:6px}
+    .hero{padding:67px 0 75px;text-align:center;position:relative}.eyebrow{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #f7dce7;color:#c95b82;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:700;box-shadow:0 5px 15px #ad456010}.hero h1{font-size:clamp(38px,6vw,64px);line-height:1.18;letter-spacing:-2.8px;margin:21px 0 14px;font-weight:800}.hero h1 em{font-style:normal;color:var(--pink)}.hero p{margin:0;color:var(--muted);font-size:16px;line-height:1.8}.search-card{max-width:800px;margin:37px auto 0;background:#fff;border:1px solid #f1eaf0;border-radius:22px;padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;text-align:left}.field{flex:1;min-width:0;padding:6px 12px}.field label{display:block;font-size:11px;color:#9a96a5;font-weight:700;margin-bottom:5px}.field input{border:0;outline:0;width:100%;color:var(--ink);font-size:15px;font-weight:700;background:transparent}.field input::placeholder{color:#c3bfca;font-weight:500}.divider{height:42px;width:1px;background:var(--line)}.swap{width:34px;height:34px;flex:none;border:1px solid var(--line);border-radius:50%;background:white;color:#a29cab;cursor:pointer;font-size:15px}.swap:hover{background:var(--pink2);color:var(--pink)}.find{flex:none;background:var(--pink);border:0;border-radius:14px;color:white;padding:15px 22px;font-weight:700;cursor:pointer;box-shadow:0 7px 16px #ef78a53b}.find:hover{transform:translateY(-1px);background:#e96b9a}.quick{display:flex;justify-content:center;gap:10px;margin-top:18px;color:#9390a0;font-size:12px}.quick button{border:1px solid #eee8ef;background:#ffffffa8;border-radius:99px;padding:7px 12px;color:#777386;cursor:pointer}.quick button:hover{border-color:#efb6cc;color:#cb6489}
+    .section{padding:32px 0 74px}.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:20px}.section-head h2{margin:0;font-size:24px;letter-spacing:-.8px}.section-head p{margin:7px 0 0;color:var(--muted);font-size:13px}.small-link{font-size:12px;color:#8e8999;font-weight:600}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.panel{background:#fff;border:1px solid #f0ebf1;border-radius:22px;padding:23px;box-shadow:0 10px 30px #44304c08}.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.panel-title h3{font-size:16px;margin:0}.tag{font-size:11px;font-weight:700;padding:6px 10px;border-radius:99px;background:#fff0f5;color:#cf648b}.route{border:1px solid #eeeaf1;border-radius:16px;padding:17px 17px 15px;margin-top:12px;transition:.2s}.route:hover{border-color:#f2bbd0;box-shadow:0 8px 20px #ef78a514;transform:translateY(-2px)}.route-top{display:flex;align-items:center;gap:11px}.bus{width:39px;height:39px;display:grid;place-items:center;background:#f1effa;border-radius:13px;font-size:20px}.route-name{font-size:14px;font-weight:700}.route-sub{font-size:11px;color:#9894a2;margin-top:4px}.route-info{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:11px;color:#777386}.pill{border-radius:99px;padding:5px 9px;background:#e9f7f1;color:#4e9a79;font-weight:700}.pill.mid{background:#fff4dc;color:#b28a3d}.line{height:1px;flex:1;background:#eeeaf1}.crowdbar{width:67px;height:6px;border-radius:9px;background:#eeebf0;overflow:hidden}.crowdbar b{display:block;height:100%;width:32%;background:#79c6a4;border-radius:9px}.crowdbar.medium b{width:58%;background:#f1bd68}
+    .insight{background:linear-gradient(140deg,#fff1f6,#fff);position:relative;overflow:hidden}.insight:after{content:'✿';position:absolute;right:-5px;top:30px;font-size:105px;color:#fce3ed}.insight .panel-title{position:relative;z-index:1}.insight-main{display:flex;align-items:center;gap:18px;position:relative;z-index:1;margin:24px 0 18px}.gauge{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#f27ca4 0 24%,#f8dce7 24% 100%);position:relative}.gauge:before{content:'';position:absolute;inset:9px;background:white;border-radius:50%}.gauge div{position:relative;text-align:center;font-size:23px;font-weight:800}.gauge small{display:block;font-size:10px;color:#9691a0;font-weight:500}.insight-copy strong{font-size:18px}.insight-copy p{font-size:12px;color:#898594;line-height:1.7;margin:7px 0 0}.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #f0e8ec;padding-top:15px;position:relative;z-index:1}.mini-stats div{text-align:center;border-right:1px solid #f0e8ec}.mini-stats div:last-child{border:0}.mini-stats b{display:block;font-size:16px}.mini-stats span{font-size:10px;color:#9691a0}
+    .features{padding:12px 0 82px}.features h2{text-align:center;font-size:24px;margin:0 0 10px}.features>p{text-align:center;font-size:13px;color:var(--muted);margin:0 0 25px}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature{background:#ffffffb8;border:1px solid #f0ebf1;border-radius:19px;padding:22px}.feature-icon{width:42px;height:42px;display:grid;place-items:center;background:#fff0f5;border-radius:14px;font-size:20px;margin-bottom:14px}.feature:nth-child(2) .feature-icon{background:#e9f7f1}.feature:nth-child(3) .feature-icon{background:#f1effa}.feature h3{font-size:14px;margin:0 0 7px}.feature p{font-size:12px;line-height:1.7;color:#898594;margin:0}.notice{border-radius:18px;background:#f4f1fb;padding:19px 22px;display:flex;gap:12px;align-items:flex-start;color:#79728e;font-size:12px;line-height:1.7;margin-bottom:64px}.notice b{color:#5b527b;white-space:nowrap}footer{border-top:1px solid #eeeaf1;padding:24px 0 32px;color:#a19cab;font-size:11px;display:flex;justify-content:space-between}footer strong{color:#777386}
+    .crossing-scene{position:fixed;z-index:0;left:calc(50% - 190px);bottom:5vh;width:380px;height:82px;pointer-events:none;opacity:.19}.crossing-road{position:absolute;left:0;right:0;bottom:0;height:30px;background:#89919d;border-radius:5px}.crossing-stripes{position:absolute;left:24px;bottom:5px;width:104px;height:20px;background:repeating-linear-gradient(90deg,#fff 0 10px,transparent 10px 19px);opacity:.9}.walker{position:absolute;bottom:21px;width:14px;height:42px;animation:walk-step .55s ease-in-out infinite alternate}.walker:before{content:'';position:absolute;left:4px;top:0;width:9px;height:9px;border-radius:50%;background:#554b70}.walker:after{content:'';position:absolute;left:6px;top:9px;width:5px;height:20px;border-radius:5px;background:#ef78a5;box-shadow:-5px 13px 0 -1px #554b70,5px 13px 0 -1px #554b70}.walker.one{left:42px;animation-delay:.1s}.walker.two{left:83px;bottom:23px;transform:scale(.88);animation-delay:.35s}.stop-bus{position:absolute;right:12px;bottom:15px;width:100px;height:48px;border-radius:12px 15px 6px 6px;background:#55addb;border:3px solid #fff}.stop-bus:before{content:'';position:absolute;left:8px;right:8px;top:7px;height:17px;border-radius:5px;background:repeating-linear-gradient(90deg,#d9f4ff 0 20px,#55addb 20px 24px)}.stop-bus:after{content:'';position:absolute;left:13px;bottom:-7px;width:13px;height:13px;border-radius:50%;background:#35485c;box-shadow:58px 0 #35485c}.weather-section{padding:22px 0 76px}.weather-intro{text-align:center;margin-bottom:22px}.weather-intro h2{font-size:25px;margin:0 0 8px}.weather-intro p{font-size:13px;color:var(--muted);margin:0}.weather-controls{display:flex;align-items:end;gap:10px;background:#fff;border:1px solid #f0ebf1;border-radius:18px;padding:16px;margin-bottom:16px}.weather-control{flex:1}.weather-control label{display:block;font-size:11px;color:#908b9c;font-weight:700;margin-bottom:7px}.weather-control select,.weather-control input{width:100%;height:42px;border:1px solid #ece7ef;border-radius:11px;padding:0 12px;background:#fff;color:var(--ink)}.weather-load{height:42px;padding:0 18px;border:0;border-radius:11px;background:var(--pink);color:#fff;font-weight:700;cursor:pointer}.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.weather-card{background:#fff;border:1px solid #f0ebf1;border-radius:20px;padding:22px;min-height:205px;box-shadow:0 10px 30px #44304c08}.weather-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.weather-card-head h3{font-size:15px;margin:0}.weather-provider{font-size:10px;font-weight:700;color:#777386;background:#f5f2f8;padding:6px 9px;border-radius:99px}.weather-now{display:flex;align-items:center;gap:14px}.weather-icon{font-size:40px}.weather-temp{font-size:32px;font-weight:800;letter-spacing:-1px}.weather-cond{font-size:12px;color:#898594;margin-top:4px}.weather-details{display:flex;gap:15px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid #f0ebf1;font-size:11px;color:#777386}.weather-message{font-size:12px;line-height:1.7;color:#898594}.naver-weather-link{display:inline-flex;margin-top:14px;padding:10px 13px;border-radius:11px;background:#e8f7ee;color:#31835b;font-size:12px;font-weight:700}.weather-footnote{margin-top:12px;color:#9691a0;font-size:10px;line-height:1.7}.weather-result-status{margin:0 0 12px;font-size:11px;color:#8a8496;min-height:16px}
+    @keyframes walk-step{from{transform:translateY(0)}to{transform:translateY(-2px)}}    .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);opacity:0;background:#292638;color:white;border-radius:14px;padding:13px 18px;font-size:13px;box-shadow:0 12px 28px #29263833;transition:.25s;pointer-events:none;z-index:5}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:720px){.weather-controls{flex-wrap:wrap}.weather-control{flex-basis:100%}.weather-grid{grid-template-columns:1fr}.weather-load{width:100%}.crossing-scene{left:calc(50% - 160px);transform:scale(.84);transform-origin:bottom center;opacity:.14}.wrap{width:min(100% - 28px,560px)}header{height:66px}nav{gap:15px;font-size:11px}.live{display:none}.hero{padding:47px 0 55px}.hero h1{letter-spacing:-1.8px}.hero p{font-size:14px}.search-card{flex-wrap:wrap;padding:14px;border-radius:19px;gap:5px}.field{flex-basis:40%;padding:7px}.divider{height:35px}.swap{order:2}.find{width:100%;margin-top:7px;padding:13px}.quick{flex-wrap:wrap}.grid{grid-template-columns:1fr}.section{padding-bottom:53px}.feature-grid{grid-template-columns:1fr}.feature{display:flex;gap:14px;align-items:flex-start;padding:17px}.feature-icon{flex:none;margin:0}.feature h3{margin-top:2px}.features{padding-bottom:52px}.notice{margin-bottom:45px}footer{gap:12px;flex-wrap:wrap}.section-head h2{font-size:21px}}
+    .story{padding:8px 0 76px}.story-title{text-align:center;margin-bottom:25px}.story-title h2{font-size:25px;margin:0 0 8px;letter-spacing:-.8px}.story-title p{font-size:13px;color:var(--muted);margin:0}.story-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.story-card{background:#ffffffd9;border:1px solid #f0ebf1;border-radius:19px;padding:21px;display:flex;gap:14px;align-items:flex-start}.story-num{font-size:12px;font-weight:800;color:var(--pink);background:#fff0f5;border-radius:11px;padding:9px 10px}.story-card h3{font-size:14px;margin:2px 0 7px}.story-card p{font-size:12px;line-height:1.75;color:#898594;margin:0}.bus-scene{position:fixed;z-index:0;left:0;bottom:9vh;width:300px;height:90px;pointer-events:none;opacity:.24;animation:bus-pass 26s linear infinite}.bus-scene svg{width:100%;height:100%;filter:drop-shadow(0 7px 10px #39779c20)}@keyframes bus-pass{from{transform:translateX(-340px)}to{transform:translateX(calc(100vw + 340px))}}header,main,footer{position:relative;z-index:1}    .crossing-scene{position:fixed;z-index:0;left:calc(50% - 190px);bottom:5vh;width:380px;height:82px;pointer-events:none;opacity:.19}.crossing-road{position:absolute;left:0;right:0;bottom:0;height:30px;background:#89919d;border-radius:5px}.crossing-stripes{position:absolute;left:24px;bottom:5px;width:104px;height:20px;background:repeating-linear-gradient(90deg,#fff 0 10px,transparent 10px 19px);opacity:.9}.walker{position:absolute;bottom:21px;width:14px;height:42px;animation:walk-step .55s ease-in-out infinite alternate}.walker:before{content:'';position:absolute;left:4px;top:0;width:9px;height:9px;border-radius:50%;background:#554b70}.walker:after{content:'';position:absolute;left:6px;top:9px;width:5px;height:20px;border-radius:5px;background:#ef78a5;box-shadow:-5px 13px 0 -1px #554b70,5px 13px 0 -1px #554b70}.walker.one{left:42px;animation-delay:.1s}.walker.two{left:83px;bottom:23px;transform:scale(.88);animation-delay:.35s}.stop-bus{position:absolute;right:12px;bottom:15px;width:100px;height:48px;border-radius:12px 15px 6px 6px;background:#55addb;border:3px solid #fff}.stop-bus:before{content:'';position:absolute;left:8px;right:8px;top:7px;height:17px;border-radius:5px;background:repeating-linear-gradient(90deg,#d9f4ff 0 20px,#55addb 20px 24px)}.stop-bus:after{content:'';position:absolute;left:13px;bottom:-7px;width:13px;height:13px;border-radius:50%;background:#35485c;box-shadow:58px 0 #35485c}.weather-section{padding:22px 0 76px}.weather-intro{text-align:center;margin-bottom:22px}.weather-intro h2{font-size:25px;margin:0 0 8px}.weather-intro p{font-size:13px;color:var(--muted);margin:0}.weather-controls{display:flex;align-items:end;gap:10px;background:#fff;border:1px solid #f0ebf1;border-radius:18px;padding:16px;margin-bottom:16px}.weather-control{flex:1}.weather-control label{display:block;font-size:11px;color:#908b9c;font-weight:700;margin-bottom:7px}.weather-control select,.weather-control input{width:100%;height:42px;border:1px solid #ece7ef;border-radius:11px;padding:0 12px;background:#fff;color:var(--ink)}.weather-load{height:42px;padding:0 18px;border:0;border-radius:11px;background:var(--pink);color:#fff;font-weight:700;cursor:pointer}.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.weather-card{background:#fff;border:1px solid #f0ebf1;border-radius:20px;padding:22px;min-height:205px;box-shadow:0 10px 30px #44304c08}.weather-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.weather-card-head h3{font-size:15px;margin:0}.weather-provider{font-size:10px;font-weight:700;color:#777386;background:#f5f2f8;padding:6px 9px;border-radius:99px}.weather-now{display:flex;align-items:center;gap:14px}.weather-icon{font-size:40px}.weather-temp{font-size:32px;font-weight:800;letter-spacing:-1px}.weather-cond{font-size:12px;color:#898594;margin-top:4px}.weather-details{display:flex;gap:15px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid #f0ebf1;font-size:11px;color:#777386}.weather-message{font-size:12px;line-height:1.7;color:#898594}.naver-weather-link{display:inline-flex;margin-top:14px;padding:10px 13px;border-radius:11px;background:#e8f7ee;color:#31835b;font-size:12px;font-weight:700}.weather-footnote{margin-top:12px;color:#9691a0;font-size:10px;line-height:1.7}.weather-result-status{margin:0 0 12px;font-size:11px;color:#8a8496;min-height:16px}
+    @keyframes walk-step{from{transform:translateY(0)}to{transform:translateY(-2px)}}    .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);opacity:0;background:#292638;color:white;border-radius:14px;padding:13px 18px;font-size:13px;box-shadow:0 12px 28px #29263833;transition:.25s;pointer-events:none;z-index:5}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:720px){.weather-controls{flex-wrap:wrap}.weather-control{flex-basis:100%}.weather-grid{grid-template-columns:1fr}.weather-load{width:100%}.crossing-scene{left:calc(50% - 160px);transform:scale(.84);transform-origin:bottom center;opacity:.14}.story-grid{grid-template-columns:1fr}.story-title h2{font-size:22px}.bus-scene{bottom:7vh;opacity:.16;width:240px}.wrap{width:min(100% - 28px,560px)}header{height:66px}nav{gap:15px;font-size:11px}.live{display:none}.hero{padding:47px 0 55px}.hero h1{letter-spacing:-1.8px}.hero p{font-size:14px}.search-card{flex-wrap:wrap;padding:14px;border-radius:19px;gap:5px}.field{flex-basis:40%;padding:7px}.divider{height:35px}.swap{order:2}.find{width:100%;margin-top:7px;padding:13px}.quick{flex-wrap:wrap}.grid{grid-template-columns:1fr}.section{padding-bottom:53px}.feature-grid{grid-template-columns:1fr}.feature{display:flex;gap:14px;align-items:flex-start;padding:17px}.feature-icon{flex:none;margin:0}.feature h3{margin-top:2px}.features{padding-bottom:52px}.notice{margin-bottom:45px}footer{gap:12px;flex-wrap:wrap}.section-head h2{font-size:21px}}
+    @media(max-width:390px){nav{gap:10px}.brand{font-size:18px}.hero h1{font-size:36px}.quick button{padding:6px 9px}}
+  </style>
+</head>
+<body>
+<div class="bus-scene" aria-hidden="true"><svg viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="14" width="265" height="57" rx="15" fill="#55addb"/><rect x="29" y="23" width="42" height="24" rx="5" fill="#d9f4ff"/><rect x="78" y="23" width="42" height="24" rx="5" fill="#d9f4ff"/><rect x="127" y="23" width="42" height="24" rx="5" fill="#d9f4ff"/><rect x="176" y="23" width="42" height="24" rx="5" fill="#d9f4ff"/><rect x="225" y="23" width="41" height="39" rx="5" fill="#d9f4ff"/><rect x="25" y="53" width="192" height="8" rx="4" fill="#318bc2"/><circle cx="67" cy="70" r="12" fill="#35485c"/><circle cx="67" cy="70" r="5" fill="#e9f6fc"/><circle cx="235" cy="70" r="12" fill="#35485c"/><circle cx="235" cy="70" r="5" fill="#e9f6fc"/><rect x="276" y="48" width="8" height="10" rx="3" fill="#ffe38a"/></svg></div>
+<div class="crossing-scene" aria-hidden="true"><div class="crossing-road"></div><div class="crossing-stripes"></div><div class="walker one"></div><div class="walker two"></div><div class="stop-bus"></div></div>
+<header class="wrap"><a class="brand" href="#top"><span class="brand-mark">🚌</span>버스<span>온</span></a><nav><a href="#routes">추천 경로</a><a href="#insight">혼잡도</a><a href="#why">만든 이유</a><a href="#weather">날씨</a><a href="#how">서비스 소개</a></nav><div class="live"><i></i>실시간 교통 반영 중</div></header>
+<main id="top">
+  <section class="hero wrap"><div class="eyebrow">✦ 오늘의 이동을 더 가볍게</div><h1>덜 붐비는 버스로,<br><em>더 빠르게</em> 도착해요</h1><p>실시간 교통과 예상 혼잡도를 분석해<br>지금 가장 편한 버스 경로를 찾아드려요.</p>
+    <form class="search-card" id="searchForm"><div class="field"><label for="from">출발지</label><input id="from" placeholder="어디에서 출발하세요?" autocomplete="off" /></div><button class="swap" id="swap" type="button" aria-label="출발지와 도착지 바꾸기">↔</button><div class="divider"></div><div class="field"><label for="to">도착지</label><input id="to" placeholder="어디로 가시나요?" autocomplete="off" /></div><button class="find" type="submit">경로 찾기 <span>→</span></button></form>
+    <div class="quick"><span>예시로 검색</span><button data-from="강남역" data-to="한신대학교">강남역 → 한신대학교</button><button data-from="수원역" data-to="광교중앙역">수원역 → 광교중앙역</button><button data-from="서울역" data-to="홍대입구">서울역 → 홍대입구</button></div>
+  </section>
+  <section class="section wrap" id="routes"><div class="section-head"><div><h2>오늘의 추천 경로 <span style="color:#ef78a5">✿</span></h2><p>시간과 혼잡도를 함께 고려한 이동 옵션이에요.</p></div><a class="small-link" href="#how">추천 기준 보기 ↗</a></div>
+    <div class="grid"><div class="panel"><div class="panel-title"><h3>가장 편안한 경로</h3><span class="tag">혼잡도 우선</span></div>
+      <article class="route"><div class="route-top"><div class="bus">🚌</div><div><div class="route-name">혼잡도 낮은 경로</div><div class="route-sub">강남역 → 한신대학교</div></div></div><div class="route-info"><span class="pill">여유</span><span>좌석 여유 예상</span><div class="line"></div><span>정류장 도보 구간</span><div class="crowdbar"><b></b></div></div></article>
+      <article class="route"><div class="route-top"><div class="bus" style="background:#eaf6f1">🚍</div><div><div class="route-name">환승 경로</div><div class="route-sub">강남역 → 오산역 → 한신대</div></div></div><div class="route-info"><span class="pill mid">보통</span><span>일부 구간 혼잡</span><div class="line"></div><span>환승 도보 구간</span><div class="crowdbar medium"><b></b></div></div></article>
+    </div>
+    <aside class="panel insight" id="insight"><div class="panel-title"><h3>내 주변 혼잡도</h3><span class="tag" style="background:#e9f7f1;color:#579877">현재 기준</span></div><div class="insight-main"><div class="gauge"><div>24%<small>혼잡 지수</small></div></div><div class="insight-copy"><strong>지금은 여유로워요</strong><p>주변 정류장 버스가<br>비교적 쾌적하게 운행 중이에요.</p></div></div><div class="mini-stats"><div><b>3대</b><span>곧 도착</span></div><div><b>예측</b><span>혼잡도 기준</span></div><div><b>08:30</b><span>업데이트</span></div></div></aside></div>
+  </section>
+  <section class="story wrap" id="why"><div class="story-title"><h2>버스온을 만든 이유 <span style="color:#ef78a5">✿</span></h2><p>도착 시간만으로는 알기 어려운 출근길의 불편을 줄이고 싶었어요.</p></div><div class="story-grid"><article class="story-card"><span class="story-num">01</span><div><h3>매일 반복되는 혼잡</h3><p>출퇴근과 등하교 시간, 버스에 사람이 몰리면 이동 자체가 큰 스트레스가 됩니다.</p></div></article><article class="story-card"><span class="story-num">02</span><div><h3>도착해도 탈 수 없는 버스</h3><p>앱에서 가장 빠른 경로를 골라도 버스가 만석이면 기다리거나 다른 방법을 찾아야 해요.</p></div></article><article class="story-card"><span class="story-num">03</span><div><h3>예상보다 늦어지는 도착</h3><p>현재 도로 상황에 따라 이동 시간이 달라져 약속이나 수업에 늦을 때도 있습니다.</p></div></article><article class="story-card"><span class="story-num">04</span><div><h3>시간과 날씨까지 고려한 안내</h3><p>날짜와 시간대, 날씨 등 이동에 영향을 주는 조건을 살펴 더 편안한 경로 선택을 돕습니다.</p></div></article></div></section>
+  <section class="weather-section wrap" id="weather">
+    <div class="weather-intro"><h2>경로 주변 날씨 <span style="color:#ef78a5">☁</span></h2><p>출발 지역의 날씨를 확인하고 이동을 준비하세요.</p></div>
+    <div class="weather-controls"><div class="weather-control"><label for="weatherCity">지역 선택</label><select id="weatherCity"><option value="37.5665,126.9780" data-name="서울">서울</option><option value="37.2636,127.0286" data-name="수원">수원</option><option value="37.1498,127.0772" data-name="오산">오산</option><option value="37.4563,126.7052" data-name="인천">인천</option><option value="35.1796,129.0756" data-name="부산">부산</option><option value="35.8714,128.6014" data-name="대구">대구</option><option value="36.3504,127.3845" data-name="대전">대전</option><option value="35.1595,126.8526" data-name="광주">광주</option></select></div><div class="weather-control"><label for="weatherApiKey">Google Weather API 키</label><input id="weatherApiKey" type="password" autocomplete="off" placeholder="API 키를 입력해야 현재 날씨를 불러옵니다" /></div><button class="weather-load" id="loadWeather" type="button">날씨 확인</button></div>
+    <p class="weather-result-status" id="weatherStatus" role="status">Google API 키를 입력하면 실시간 현재 날씨를 조회합니다.</p>
+    <div class="weather-grid"><article class="weather-card"><div class="weather-card-head"><h3>현재 날씨</h3><span class="weather-provider">Google Weather</span></div><div class="weather-now"><div class="weather-icon" id="weatherIcon">🌤️</div><div><div class="weather-temp" id="weatherTemp">--°</div><div class="weather-cond" id="weatherCondition">날씨 데이터를 불러오면 표시됩니다</div></div></div><div class="weather-details"><span id="weatherHumidity">습도 --</span><span id="weatherRain">강수확률 --</span><span id="weatherWind">바람 --</span></div></article><article class="weather-card"><div class="weather-card-head"><h3>네이버 날씨</h3><span class="weather-provider">NAVER</span></div><p class="weather-message">선택한 지역의 네이버 날씨 정보를 새 탭에서 확인할 수 있습니다. 네이버 날씨 화면은 이곳에서 바로 열리지 않을 수 있어, 공식 검색 화면으로 연결합니다.</p><a class="naver-weather-link" id="naverWeatherLink" href="https://search.naver.com/search.naver?query=%EC%84%9C%EC%9A%B8%20%EB%82%A0%EC%94%A8" target="_blank" rel="noopener noreferrer">네이버에서 서울 날씨 보기 ↗</a><p class="weather-footnote">네이버 날씨 전용 공식 개발자 API가 확인되지 않아 검색 바로가기로 제공됩니다.</p></article></div>
+    <p class="weather-footnote">Google Weather API 키는 이 브라우저에서만 사용됩니다. 공개 사이트에 배포할 때는 키 제한 설정을 적용하세요.</p>
+  </section>  <section class="features wrap" id="how"><h2>이동이 편해지는 세 가지</h2><p>버스온이 내 이동에 꼭 맞는 정보를 골라드려요.</p><div class="feature-grid"><article class="feature"><div class="feature-icon">📊</div><div><h3>미리 보는 혼잡도</h3><p>요일과 시간대별 패턴을 분석해 버스 안의 예상 혼잡도를 알려드려요.</p></div></article><article class="feature"><div class="feature-icon">🧭</div><div><h3>나에게 맞는 경로</h3><p>빠른 길부터 덜 붐비는 길까지, 기준에 맞춰 경로를 비교해요.</p></div></article><article class="feature"><div class="feature-icon">✨</div><div><h3>한눈에 비교하기</h3><p>소요 시간, 환승, 도보 거리와 혼잡 정보를 한 화면에서 확인해요.</p></div></article></div></section>
+  <section class="wrap"><div class="notice"><span>💡</span><div><b>안내</b> 이 페이지는 서비스 콘셉트를 보여주는 데모예요.</div></div></section>
+</main><footer class="wrap"><strong>🚌 버스온</strong><span>더 편안한 대중교통 이동을 위한 프로젝트</span><span>© 2026 BusOn</span></footer><div class="toast" id="toast" role="status"></div>
+<script>
+const from=document.querySelector('#from'),to=document.querySelector('#to'),toast=document.querySelector('#toast');let timer;
+document.querySelector('#swap').addEventListener('click',()=>{[from.value,to.value]=[to.value,from.value]});
+document.querySelectorAll('.quick button').forEach(button=>button.addEventListener('click',()=>{from.value=button.dataset.from;to.value=button.dataset.to;from.focus()}));
+document.querySelector('#searchForm').addEventListener('submit',event=>{event.preventDefault();if(!from.value.trim()||!to.value.trim()){toast.textContent='출발지와 도착지를 입력해 주세요.'}else{toast.textContent=`${from.value.trim()}에서 ${to.value.trim()}까지 경로를 보여드려요.`;document.querySelector('#routes').scrollIntoView({behavior:'smooth'})}toast.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>toast.classList.remove('show'),2800)});
+</script>
+<script>
+// 추가 기능: 입력한 출발지·도착지를 예시 경로 카드에 반영합니다.
+(() => {
+  const form = document.querySelector('#searchForm');
+  const startInput = document.querySelector('#from');
+  const endInput = document.querySelector('#to');
+  const routeCards = document.querySelectorAll('#routes .route');
+  const sectionDescription = document.querySelector('#routes .section-head p');
+  const routeLabels = Array.from(routeCards, card => card.querySelector('.route-sub'));
+  const originalRoutes = routeLabels.map(label => label.textContent);
+  const originalDescription = sectionDescription.textContent;
+
+  form.addEventListener('submit', () => {
+    const start = startInput.value.trim();
+    const end = endInput.value.trim();
+    if (!start || !end) return;
+
+    routeLabels.forEach((label, index) => {
+      label.textContent = `${start} → ${end}${index === 1 ? ' · 환승 : ''}`;
+    });
+    sectionDescription.textContent = `${start}에서 ${end}까지의 경로예요. `;
+  });
+
+  document.querySelectorAll('.quick button').forEach(button => {
+    button.addEventListener('click', () => {
+      // 예시 검색을 누르면 입력란만 채우고, 경로 찾기 버튼을 눌렀을 때 카드에 적용합니다.
+      routeLabels.forEach((label, index) => { label.textContent = originalRoutes[index]; });
+      sectionDescription.textContent = originalDescription;
+    });
+  });
+})();
+</script>
+<script>
+// 추가 기능: 지역에 따라 버스 번호 형식과 예시 교통 정보를 갱신합니다.
+(() => {
+  const from = document.querySelector('#from');
+  const to = document.querySelector('#to');
+  const gauge = document.querySelector('.gauge');
+  const gaugeValue = gauge.querySelector('div');
+  const insightTitle = document.querySelector('.insight-copy strong');
+  const insightCopy = document.querySelector('.insight-copy p');
+  const updateTime = document.querySelector('.mini-stats div:last-child b');
+  const bars = [...document.querySelectorAll('.crowdbar b')];
+  const pills = [...document.querySelectorAll('.route-info .pill')];
+
+  // 데모에서 인식하는 수도권 지명과 경기도 지명입니다. 필요하면 목록을 더 추가할 수 있습니다.
+  const gyeonggiPattern = /경기|경기도|수원|성남|고양|용인|화성|부천|안산|안양|평택|의정부|파주|김포|광명|군포|오산|하남|구리|남양주|시흥|광주|이천|양주|동두천|과천|의왕|포천|여주|가평|연천|한신대|오산대|광교|판교|분당|일산|동탄|수지|기흥|평촌|영통/;
+  const clock = () => new Intl.DateTimeFormat('ko-KR', {hour:'2-digit', minute:'2-digit', hour12:false}).format(new Date());
+
+  function refreshExample() {
+    const start = from.value.trim();
+    const end = to.value.trim();
+    if (!start || !end) return;
+    const isGyeonggiTrip = gyeonggiPattern.test(start) || gyeonggiPattern.test(end);
+    const crowd = isGyeonggiTrip ? 60 + Math.floor(Math.random() * 7) : 18 + Math.floor(Math.random() * 65);
+    gauge.style.background = `conic-gradient(#f27ca4 0 ${crowd}%, #f8dce7 ${crowd}% 100%)`;
+    gaugeValue.innerHTML = `${crowd}%<small>혼잡 지수</small>`;
+    insightTitle.textContent = crowd >= 60 ? '조금 붐빌 수 있어요' : crowd >= 40 ? '보통 수준이에요' : '지금은 여유로워요';
+    insightCopy.innerHTML = `입력한 경로 주변의<br>예상 혼잡도예요.`;
+    bars.forEach((bar, index) => { bar.style.width = `${Math.min(95, Math.max(18, crowd + (index ? 9 : -7)))}%`; });
+    pills.forEach((pill, index) => {
+      const value = Math.min(95, Math.max(18, crowd + (index ? 9 : -7)));
+      pill.textContent = value >= 60 ? '혼잡' : value >= 40 ? '보통' : '여유';
+      pill.className = `pill${value >= 40 && value < 60 ? ' mid' : ''}`;
+      if (value >= 60) pill.style.cssText = 'background:#fff0f0;color:#c76868';
+      else pill.style.cssText = '';
+    });
+    updateTime.textContent = clock();
+  }
+
+  // 새로고침하면 현재 시각으로 갱신합니다. 검색할 때마다 예시 수치도 다시 계산합니다.
+  updateTime.textContent = clock();
+  document.querySelector('#searchForm').addEventListener('submit', refreshExample);
+})();
+</script>
+<script>
+(() => {
+  const city = document.querySelector('#weatherCity');
+  const keyInput = document.querySelector('#weatherApiKey');
+  const status = document.querySelector('#weatherStatus');
+  const link = document.querySelector('#naverWeatherLink');
+  const placeCoords = () => city.value.split(',').map(Number);
+  const placeName = () => city.options[city.selectedIndex].dataset.name;
+  const updateNaverLink = () => {
+    const query = encodeURIComponent(`${placeName()} 날씨`);
+    link.href = `https://search.naver.com/search.naver?query=${query}`;
+    link.textContent = `네이버에서 ${placeName()} 날씨 보기 ↗`;
+  };
+  city.addEventListener('change', updateNaverLink);
+  updateNaverLink();
+
+  document.querySelector('#loadWeather').addEventListener('click', async () => {
+    const apiKey = keyInput.value.trim();
+    if (!apiKey) {
+      status.textContent = 'Google Weather API 키를 입력해 주세요. 키 없이도 네이버 날씨 바로가기를 사용할 수 있습니다.';
+      return;
+    }
+    status.textContent = `${placeName()} 날씨를 불러오는 중입니다…`;
+    const [latitude, longitude] = placeCoords();
+    const url = new URL('https://weather.googleapis.com/v1/currentConditions:lookup');
+    url.searchParams.set('key', apiKey);
+    url.searchParams.set('location.latitude', latitude);
+    url.searchParams.set('location.longitude', longitude);
+    url.searchParams.set('languageCode', 'ko');
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      document.querySelector('#weatherTemp').textContent = `${Math.round(data.temperature?.degrees ?? 0)}°`;
+      document.querySelector('#weatherCondition').textContent = data.weatherCondition?.description?.text ?? '날씨 정보';
+      document.querySelector('#weatherHumidity').textContent = `습도 ${data.relativeHumidity ?? '--'}%`;
+      document.querySelector('#weatherRain').textContent = `강수확률 ${data.precipitation?.probability?.percent ?? '--'}%`;
+      document.querySelector('#weatherWind').textContent = `바람 ${data.wind?.speed?.value ?? '--'} km/h`;
+      const iconBase = data.weatherCondition?.iconBaseUri;
+      document.querySelector('#weatherIcon').innerHTML = iconBase ? `<img src="${iconBase}.svg" alt="날씨 아이콘" width="48" height="48">` : '🌤️';
+      status.textContent = `${placeName()}의 Google 현재 날씨를 표시하고 있습니다.`;
+    } catch (error) {
+      status.textContent = '날씨를 불러오지 못했습니다. API 키, API 활성화, 결제 설정을 확인해 주세요.';
+    }
+  });
+})();
+</script>
+</body></html>
+
